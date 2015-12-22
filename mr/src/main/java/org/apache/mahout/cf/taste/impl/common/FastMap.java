@@ -229,26 +229,28 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
   }
   
   private void clearStaleEntry(int index) {
+	int finalIndex = index;
+	
     while (true) {
       K currentKey;
       do {
-        if (index == 0) {
-          index = keys.length - 1;
+        if (finalIndex == 0) {
+          finalIndex = keys.length - 1;
         } else {
-          index--;
+          finalIndex--;
         }
-        currentKey = keys[index];
+        currentKey = keys[finalIndex];
       } while (currentKey == null || currentKey == REMOVED);
-      if (recentlyAccessed.get(index)) {
-        recentlyAccessed.clear(index);
+      if (recentlyAccessed.get(finalIndex)) {
+        recentlyAccessed.clear(finalIndex);
       } else {
         break;
       }
     }
     // Delete the entry
-    ((Object[])keys)[index] = REMOVED;
+    ((Object[])keys)[finalIndex] = REMOVED;
     numEntries--;
-    values[index] = null;
+    values[finalIndex] = null;
   }
   
   @Override
