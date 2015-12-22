@@ -210,26 +210,28 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   }
   
   private void clearStaleEntry(int index) {
+	int finalIndex = index;
+	
     while (true) {
       long currentKey;
       do {
-        if (index == 0) {
-          index = keys.length - 1;
+        if (finalIndex == 0) {
+          finalIndex = keys.length - 1;
         } else {
-          index--;
+          finalIndex--;
         }
-        currentKey = keys[index];
+        currentKey = keys[finalIndex];
       } while (currentKey == NULL || currentKey == REMOVED);
-      if (recentlyAccessed.get(index)) {
-        recentlyAccessed.clear(index);
+      if (recentlyAccessed.get(finalIndex)) {
+        recentlyAccessed.clear(finalIndex);
       } else {
         break;
       }
     }
     // Delete the entry
-    keys[index] = REMOVED;
+    keys[finalIndex] = REMOVED;
     numEntries--;
-    values[index] = null;
+    values[finalIndex] = null;
   }
   
   public V remove(long key) {
