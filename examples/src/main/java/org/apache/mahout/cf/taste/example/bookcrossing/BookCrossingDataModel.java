@@ -54,6 +54,8 @@ public final class BookCrossingDataModel extends FileDataModel {
   }
   
   private static File convertBCFile(File originalFile, boolean ignoreRatings) throws IOException {
+	boolean skip;
+	
     if (!originalFile.exists()) {
       throw new FileNotFoundException(originalFile.toString());
     }
@@ -63,23 +65,27 @@ public final class BookCrossingDataModel extends FileDataModel {
     try {
       writer = new OutputStreamWriter(new FileOutputStream(resultFile), Charsets.UTF_8);
       for (String line : new FileLineIterable(originalFile, true)) {
+    	//by default, line isn't skipped  
+    	skip = false;
         // 0 ratings are basically "no rating", ignore them (thanks h.9000)
         if (line.endsWith("\"0\"")) {
-          continue;
+          skip = true;
         }
         // Delete replace anything that isn't numeric, or a semicolon delimiter. Make comma the delimiter.
         String convertedLine = NON_DIGIT_SEMICOLON_PATTERN.matcher(line)
             .replaceAll("").replace(';', ',');
         // If this means we deleted an entire ID -- few cases like that -- skip the line
         if (convertedLine.contains(",,")) {
-          continue;
+          skip = true;
         }
         if (ignoreRatings) {
           // drop rating
           convertedLine = convertedLine.substring(0, convertedLine.lastIndexOf(','));
         }
-        writer.write(convertedLine);
-        writer.write('\n');
+        if(!skip) {
+            writer.write(convertedLine);
+            writer.write('\n');
+        }
       }
       writer.flush();
     } catch (IOException ioe) {
